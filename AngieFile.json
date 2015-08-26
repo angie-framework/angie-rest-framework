@@ -1,0 +1,24 @@
+{
+    "projectName": "template",
+    "projectRoot": "./src",
+    "development": true,
+    "databases": {
+        "default": {
+            "type": "sqlite3",
+            "name": "template.db"
+        }
+    },
+    "templateDirs": [
+        "templates/"
+    ],
+    "staticDirs": [
+        "static/"
+    ],
+    "dependencies": [
+        "angie-log",
+        "angie-injector",
+        "angie-orm"
+    ],
+    "cacheStaticAssets": true,
+    "loadDefaultScriptFile": "application.js"
+}
