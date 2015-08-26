@@ -85,15 +85,13 @@ gulp.task('bump', function(cb) {
             version
         ));
     if (version) {
-        const CHANGELOG = fs.readFileSync('CHANGELOG.md', 'utf8');
+        const CHANGELOG = fs.readFileSync('.CHANGELOG.md', 'utf8');
 
         // Verify that the version is in the CHANGELOG
         if (CHANGELOG.indexOf(version) === -1) {
             throw new Error(bread('Version has no entry in CHANGELOG.md'));
         }
 
-        bump('bin/angie-template');
-        bump('bin/angie-template-dist');
         bump('package.json');
     } else {
         throw new Error(bread('No version specified!!'));
