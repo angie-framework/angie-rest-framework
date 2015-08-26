@@ -1,0 +1,12 @@
+app
+bower_components
+coverage
+debug
+doc
+dist
+svg
+node_modules
+script
+.editorconfig
+.travis.yml
+CHANGELOG.md
