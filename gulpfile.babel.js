@@ -10,7 +10,9 @@ import {Instrumenter} from      'isparta';
 import mocha from               'gulp-mocha';
 import cobertura from           'istanbul-cobertura-badger';
 import babel from               'gulp-babel';
-import chalk from               'chalk';
+import {bold, red} from         'chalk';
+
+const bread = (str) => bold(red(str));
 
 const SRC = 'src/**/*.js',
     TRANSPILED_SRC = 'dist',
@@ -42,7 +44,7 @@ gulp.task('mocha', function(cb) {
         proc = gulp.src(SRC).pipe(
             istanbul({
                 instrumenter: Instrumenter,
-                includeUntested: false
+                includeUntested: true
             })
         ).pipe(
             istanbul.hookRequire()
@@ -83,11 +85,18 @@ gulp.task('bump', function(cb) {
             version
         ));
     if (version) {
+        const CHANGELOG = fs.readFileSync('CHANGELOG.md', 'utf8');
+
+        // Verify that the version is in the CHANGELOG
+        if (CHANGELOG.indexOf(version) === -1) {
+            throw new Error(bread('Version has no entry in CHANGELOG.md'));
+        }
+
         bump('bin/angie-template');
         bump('bin/angie-template-dist');
         bump('package.json');
     } else {
-        throw new Error(bold(red('No version specified!!')));
+        throw new Error(bread('No version specified!!'));
     }
 });
 gulp.task('watch', [ 'jscs', 'mocha' ], function() {

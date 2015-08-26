@@ -20,6 +20,8 @@
     "babel-node": "*",
     "node": "*"
   },
+  "repository": {},
+  "bugs": {},
   "keywords": [
     "Angie",
     "JavaScript",
