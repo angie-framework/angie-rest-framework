@@ -1,0 +1,12 @@
+app
+bower_components
+coverage
+debug
+doc
+dist
+svg
+node_modules
+.editorconfig
+CHANGELOG.md
+CONTRIBUTORS.md
+README.md
