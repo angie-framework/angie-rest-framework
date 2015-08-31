@@ -6,7 +6,10 @@ doc
 dist
 svg
 node_modules
+script
 .editorconfig
+.travis.yml
+.CHANGELOG.md
 CHANGELOG.md
 CONTRIBUTORS.md
 README.md

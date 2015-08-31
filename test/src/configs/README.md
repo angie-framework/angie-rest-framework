@@ -1,0 +1,1 @@
+Add all tests for `config` components to this directory.
