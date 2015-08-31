@@ -1,6 +1,6 @@
 {
   "name": "angie-package-template",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Template for Angie Dependency Package Creation",
   "license": "MIT",
   "bin": {
