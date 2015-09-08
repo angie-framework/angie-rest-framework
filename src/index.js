@@ -1,5 +1,7 @@
+/**
+ * @module index.js
+ * @author Joe Groseclose <@benderTheCrime>
+ * @date 9/8/2015
+ */
 
-
-// The very first thing this module needs to do is refactor the Controller method
-
-// Add all of the serializers
+import './Angie';
