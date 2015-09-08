@@ -4,14 +4,14 @@
   "description": "A RESTful API Implementation of the Angie Framework",
   "license": "MIT",
   "bin": {
-    "angie-log": "bin/angie-template",
-    "angie-log-dist": "bin/angie-template-dist"
+    "angie-rest-framework": "bin/angie-rest-framework",
+    "angie-rest-framework": "bin/angie-rest-framework-dist"
   },
   "main": "dist/index.js",
   "private": true,
   "preferGlobal": false,
   "scripts": {
-    "start": "node bin/angie-template-dist",
+    "start": "node bin/angie-rest-framework-dist",
     "test": "gulp test",
     "postinstall": "babel src --out-dir dist --comments false"
   },
