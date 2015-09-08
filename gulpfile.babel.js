@@ -2,7 +2,6 @@
 import fs from              'fs';
 import gulp from            'gulp';
 import {argv} from          'yargs';
-import {exec} from          'child_process';
 import eslint from          'gulp-eslint';
 import jscs from            'gulp-jscs';
 import {Instrumenter} from  'isparta';
