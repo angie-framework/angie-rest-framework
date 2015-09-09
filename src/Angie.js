@@ -17,8 +17,7 @@ const HTTP_METHODS = [
     'PUT',
     'DELETE',
     'UPDATE',
-    'PATCH',
-    'TRACE'
+    'PATCH'
 ];
 
 // At this point, global.app needs to exist to invoke this
