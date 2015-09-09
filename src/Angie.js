@@ -17,7 +17,6 @@ const HTTP_METHODS = [
     'PUT',
     'DELETE',
     'UPDATE',
-    'OPTIONS',
     'PATCH',
     'TRACE'
 ];
@@ -47,12 +46,17 @@ if (global.app && global.app.Controller) {
 // TODO wrap each controller invocation with a reference to the next controller up
 function controllerWrapper(obj) {
     return function($request, $response, $CustomResponse) {
-        const Controller = obj,
+        const controller = new $injectionBinder(obj),
+            controllerMethods = Object.keys(obj.prototype || {}).filter(
+                (v) => new RegExp(v, 'i').test(HTTP_METHODS)
+            ),
             method = $request.method;
 
-        if (HTTP_METHODS.indexOf($request.method) > -1) {
-            const controller = new $injectionBinder(Controller);
+        if (/options/i.test(method)) {
 
+            // TODO optional description parameter
+            // TODO return controllerMethods
+        } else if (HTTP_METHODS.indexOf(method) > -1) {
             if (
                 controller.hasOwnProperty(method) &&
                 typeof controller.method === 'function'
@@ -63,10 +67,6 @@ function controllerWrapper(obj) {
             }
         }
     };
-
-
-    // TODO then check to see that it exists in an instantiated controller
-    // called with injection binder
 }
 
 
