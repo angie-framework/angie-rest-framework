@@ -1,5 +1,5 @@
 {
-  "name": "angie-package-template",
+  "name": "angie-rest-framework",
   "version": "0.0.1",
   "description": "A RESTful API Implementation of the Angie Framework",
   "license": "MIT",

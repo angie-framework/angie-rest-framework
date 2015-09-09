@@ -25,7 +25,7 @@ if (global.app && global.app.controller) {
         'PATCH',
         'TRACE'
     ])
-    global.app.controller = function(name, obj) {
+    global.app.Controller = function(name, obj) {
         if (!(obj.prototype && obj.prototype.constructor)) {
             throw new $$InvalidRESTfulControllerError(name);
         }
@@ -40,9 +40,9 @@ if (global.app && global.app.controller) {
 
 // TODO wrap each controller invocation with a reference to the next controller up
 function controllerWrapper($request) {
-    const
+    //const
 
-    if ($request.method )
+    if ($request.method) {}
     // TODO first check to see that the method is in the accepted rest Framework
     // methods for http requests
 

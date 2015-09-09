@@ -22,7 +22,7 @@ class $$MissingParentModuleError extends Error {
 class $$InvalidRESTfulControllerError extends SyntaxError {
     constructor(name) {
         super(
-            bold(red(`Invalid configuration for Controller ${cyan(name)}: `) +
+            bold(red(`Invalid configuration for Controller ${cyan(name)}: `)) +
             bold(
                 'Controller must be a valid JavaScript class with a constructor'
             )
