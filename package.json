@@ -20,8 +20,13 @@
     "babel-node": "*",
     "node": "*"
   },
-  "repository": {},
-  "bugs": {},
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/angie-mvc/angie-rest-framework"
+  },
+  "bugs": {
+      "url": "https://github.com/angie-mvc/angie-rest-framework"
+  },
   "keywords": [
     "Angie",
     "JavaScript",
