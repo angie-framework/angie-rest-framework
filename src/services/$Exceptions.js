@@ -4,29 +4,24 @@
  * @date 9/8/2015
  */
 
-import {
-    bold,
-    red,
-    cyan
-} from  'chalk';
+import {cyan} from          'chalk';
+import $LogProvider from    'angie-log';
 
 class $$MissingParentModuleError extends Error {
     constructor() {
-        super(bold(red(
-            'Angie REST Framework cannot be used outside Angie dependency ' +
-            'modules'
-        )));
+        const msg = 'Angie REST Framework cannot be used outside Angie ' +
+            'dependency modules';
+        $LogProvider.error(msg);
+        super();
     }
 }
 
 class $$InvalidRESTfulControllerError extends SyntaxError {
     constructor(name) {
-        super(
-            bold(red(`Invalid configuration for Controller ${cyan(name)}: `)) +
-            bold(
-                'Controller must be a valid JavaScript class with a constructor'
-            )
-        );
+        const msg = `Invalid configuration for Controller ${cyan(name)}: ` +
+            'Controller must be a valid JavaScript class with a constructor';
+        $LogProvider.error(msg);
+        super();
     }
 }
 

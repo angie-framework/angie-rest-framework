@@ -22,10 +22,8 @@ const HTTP_METHODS = [
 
 // At this point, global.app needs to exist to invoke this
 if (global.app && global.app.Controller) {
-    // const controllerFn = global.app.Controller;
-
     global.app.constant('HTTP_METHODS', HTTP_METHODS);
-    global.app.Controller = function(name, obj) {
+    global.app.controller = global.app.Controller = function(name, obj) {
         if (!(obj.prototype && obj.prototype.constructor)) {
             throw new $$InvalidRESTfulControllerError(name);
         }
@@ -44,7 +42,7 @@ if (global.app && global.app.Controller) {
 
 // TODO wrap each controller invocation with a reference to the next controller up
 function controllerWrapper(obj) {
-    return function($request, $response, $CustomResponse) {
+    return function($request, $response) {
         const controller = new $injectionBinder(obj),
             controllerMethods = Object.keys(obj.prototype || {}).filter(
                 (v) => new RegExp(v, 'i').test(HTTP_METHODS)
@@ -62,7 +60,7 @@ function controllerWrapper(obj) {
             ) {
                 $injectionBinder(controller.method)();
             } else {
-                new $CustomResponse().head(405, null).write();
+                $Injector.get('$CustomResponse')().head(405, null).write();
             }
         }
     };
