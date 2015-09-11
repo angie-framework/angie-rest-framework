@@ -76,12 +76,6 @@ gulp.task('babel', [ 'esdoc' ], function() {
 
 // Bundled Tasks
 gulp.task('test', [ 'mocha' ]);
-gulp.task('watch:test', [ 'test' ], function() {
-    gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
-});
-gulp.task('watch:babel', [ 'babel' ], function() {
-    gulp.watch([ 'src/**' ], [ 'babel' ]);
-});
 gulp.task('default', [ 'babel' ]);
 
 // Utility Tasks

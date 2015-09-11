@@ -4,6 +4,10 @@
  * @date 9/8/2015
  */
 
+// System Modules
+import {$CustomResponse} from       'angie/src/services/$Response';
+import {$injectionBinder} from      'angie-injector';
+
 // Project Modules
 import {
     $$MissingParentModuleError,
@@ -20,6 +24,8 @@ const HTTP_METHODS = [
     'PATCH'
 ];
 
+console.log('APP', global.app);
+
 // At this point, global.app needs to exist to invoke this
 if (global.app && global.app.Controller) {
     global.app.constant('HTTP_METHODS', HTTP_METHODS);
@@ -28,11 +34,17 @@ if (global.app && global.app.Controller) {
             throw new $$InvalidRESTfulControllerError(name);
         }
 
+        console.log('OBJ', obj);
+
         let controller = controllerWrapper(obj);
+
+        console.log('CONTROLLER', controller);
 
         // return controllerFn.call(this, name, obj);
         return this.$$register('Controllers', name, controller);
     };
+
+    console.log('controller', global.app.controller);
 } else {
 
     // If it does not, we need to throw an error stopping the application's
@@ -42,6 +54,8 @@ if (global.app && global.app.Controller) {
 
 // TODO wrap each controller invocation with a reference to the next controller up
 function controllerWrapper(obj) {
+
+    console.log('OBJ', obj);
     return function($request, $response) {
         const controller = new $injectionBinder(obj),
             controllerMethods = Object.keys(obj.prototype || {}).filter(
@@ -60,7 +74,7 @@ function controllerWrapper(obj) {
             ) {
                 $injectionBinder(controller.method)();
             } else {
-                $Injector.get('$CustomResponse')().head(405, null).write();
+                new $CustomResponse().head(405, null).write();
             }
         }
     };
