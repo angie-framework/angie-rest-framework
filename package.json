@@ -6,15 +6,18 @@
   "bin": {
     "angie-rest-framework": "bin/angie-rest-framework"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "private": true,
   "preferGlobal": false,
   "scripts": {
-    "start": "node bin/angie-rest-framework",
-    "test": "gulp test"
+    "start": "node bin/angie-rest-framework-dist",
+    "test": "gulp test",
+    "postinstall": "babel src --out-dir dist --comments false"
   },
   "engines": {
-    "node": "4.x.x"
+    "iojs": "*",
+    "babel-node": "*",
+    "node": "*"
   },
   "repository": {
     "type": "git",
