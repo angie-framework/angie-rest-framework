@@ -4,7 +4,4 @@
  * @date 9/8/2015
  */
 
-console.log('IN');
-
 import './Angie';
-

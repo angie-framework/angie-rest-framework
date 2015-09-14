@@ -6,17 +6,20 @@
 
 // System Modules
 import util from                    'util';
-// import {$CustomResponse} from       'angie/dist/services/$Response';
+import {
+    $ErrorResponse,
+    $CustomResponse
+} from                              '../node_modules/angie/dist/services/$Response';
 import {$injectionBinder} from      'angie-injector';
+import $LogProvider from            'angie-log';
 
 // Project Modules
 import $APIRouteProvider from       './factories/$APIRouteProvider';
 import * as $Serializers from       './services/$Serializers';
 import * as $Renderers from         './services/$Renderers';
-import * as $Exceptions from  './services/$Exceptions';
+import * as $Exceptions from        './services/$Exceptions';
 
 const HTTP_METHODS = [
-    'HEAD',
     'GET',
     'POST',
     'PUT',
@@ -27,8 +30,9 @@ const HTTP_METHODS = [
 
 // At this point, global.app needs to exist to invoke this
 if (global.app && global.app.Controller) {
-    global.app.constant('HTTP_METHODS', HTTP_METHODS);
-    global.app.factory('$APIRoutes', $APIRouteProvider);
+    global.app
+        .constant('HTTP_METHODS', HTTP_METHODS)
+        .factory('$APIRoutes', $APIRouteProvider);
     global.app.controller = global.app.Controller = function(name, obj) {
         if (!(obj.prototype && obj.prototype.constructor)) {
             throw new $Exceptions.$$InvalidRESTfulControllerError(name);
@@ -56,67 +60,94 @@ function controllerWrapper(name, obj) {
         util._extend(controller, $scope);
 
         // Add data retrieval
-        serialize(controller, $request);
 
         let methodResponse;
-        if (/options/i.test(method)) {
-            $response.setHeader('Allow', HTTP_METHODS.filter(
-                (v) => !!controller[ v.toLowerCase() ]
-            ).join(','));
+        if (/options|head/i.test(method)) {
+            if ($request.method === 'OPTIONS') {
+                $response.setHeader('Allow', HTTP_METHODS.filter(
+                    (v) => !!controller[ v.toLowerCase() ]
+                ).join(','));
+            }
         } else if (typeof controller[ method.toLowerCase() ] === 'function') {
-            let controllerResponse = $injectionBinder(
-                controller[ method.toLowerCase() ]
-            ).call(controller);
+            return serialize(
+                name,
+                controller,
+                $request,
+                $response
+            ).then(function() {
+                let controllerResponse = $injectionBinder(
+                    controller[ method.toLowerCase() ]
+                ).call(controller);
 
-            // Add data responder
-            render(controller, $response);
-
-            return controllerResponse;
+                // Add data responder
+                render(name, controller, $request, $response);
+                $response.Controller.done(controller);
+            }).catch(function(e) {
+                // $LogProvider.error(e);
+                console.log('here');
+                new $ErrorResponse(e).head().write();
+                $response.Controller.done(controller);
+            });
         } else {
             return new $CustomResponse().head(405, null).write();
         }
     };
 }
 
-function serialize(controller, $request) {
+function serialize(name, controller, $request, $response) {
+    return new Promise(function(resolve) {
+        let data = $request.body = $request.query;
+        if ($request.method !== 'GET') {
+            $request.body = '';
+            $request.on('data', function(d) {
+                data += d;
+                if (data.length > 1E6) {
+                    $request.connection.destroy();
+                }
+            });
+            $request.on('end', () => resolve(data));
+        } else {
+            resolve(data);
+        }
+    }).then(function(data) {
+        // We have to serialize before we hit the method
+        let serializers = controller.serializer || $request.route.serializer ||
+                global.app.$$config.defaultSerializers,
+            serializerValid;
+        if (typeof serializers === 'string') {
+            serializers = [ serializers ];
+        }
 
-    // We have to serialize before we hit the method
-    let serializers = controller.serializer || $request.route.serializer ||
-            global.app.$$config.defaultSerializers,
-        serializerValid;
-    if (typeof serializers === 'string') {
-        serializers = [ serializers ];
-    }
+        if (!(serializers instanceof Array)) {
+            throw new $Exceptions.$$InvalidSerializerConfiguration(name);
+        } else {
+            for (let serializer of serializers) {
+                let serialized;
+                if (
+                    typeof serializer === 'string' &&
+                    $Serializers.hasOwnProperty(serializer)
+                ) {
+                    serialized = new $Serializers[ serializer ](data);
+                } else {
+                    throw new $Exceptions.$$UnsuccessfulDataSerializationError(
+                        serializer
+                    );
+                }
 
-    if (!(serializers instanceof Array)) {
-        throw new $Exceptions.$$InvalidSerializerConfiguration(name);
-    } else {
-        for (let serializer of serializers) {
-            let serialized;
-            if (
-                typeof serializer === 'string' &&
-                $Serializers.hasOwnProperty(serializer)
-            ) {
-                serialized = new $Serializers[ serializer ];
-            } else {
-                throw new $Exceptions.$$UnsuccessfulDataSerializationError(
-                    serializer
-                );
-            }
-
-            if (serialized.valid) {
-                serializerValid = true;
-                break;
+                if (serialized.valid) {
+                    serializerValid = true;
+                    break;
+                }
             }
         }
-    }
 
-    if (!serializerValid) {
-        throw new $Exceptions.$$UnsuccessfulDataSerializationError();
-    }
+        if (!serializerValid) {
+            throw new $Exceptions.$$UnsuccessfulDataSerializationError();
+        }
+    });
 }
 
-function render(controller, $response) {
+function render(name, controller, $request, $response) {
 
     // Render the response data
     let renderers = controller.renderer || $request.route.renderer ||

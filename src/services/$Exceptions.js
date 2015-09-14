@@ -27,13 +27,17 @@ class $$InvalidRESTfulControllerError extends SyntaxError {
 
 class $$InvalidSerializerConfiguration extends ReferenceError {
     constructor(name = '') {
-        $LogProvider.error(`No serializers specified for Controller ${name}`);
+        const msg = `No serializers specified for Controller ${cyan(name)}`;
+        $LogProvider.error(msg);
+        super();
     }
 }
 
 class $$InvalidRendererConfiguration extends ReferenceError {
     constructor(name = '') {
-        $LogProvider.error(`No renderers specified for Controller ${name}`);
+        const msg = `No renderers specified for Controller ${cyan(name)}`;
+        $LogProvider.error(msg);
+        super();
     }
 }
 
@@ -57,5 +61,9 @@ class $$UnsuccessfulDataRenderingError extends Error {
 
 export {
     $$MissingParentModuleError,
-    $$InvalidRESTfulControllerError
+    $$InvalidRESTfulControllerError,
+    $$InvalidSerializerConfiguration,
+    $$InvalidRendererConfiguration,
+    $$UnsuccessfulDataSerializationError,
+    $$UnsuccessfulDataRenderingError
 };

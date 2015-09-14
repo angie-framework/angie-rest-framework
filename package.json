@@ -1,13 +1,13 @@
 {
   "name": "angie-rest-framework",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "A RESTful API Implementation of the Angie Framework",
   "license": "MIT",
   "bin": {
     "angie-rest-framework": "bin/angie-rest-framework"
   },
   "main": "dist/index.js",
-  "private": true,
+  "private": false,
   "preferGlobal": false,
   "scripts": {
     "start": "node bin/angie-rest-framework-dist",
