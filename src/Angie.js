@@ -74,22 +74,34 @@ function controllerWrapper(name, obj) {
                 controller,
                 $request,
                 $response
-            ).then(function() {
-                let controllerResponse = $injectionBinder(
-                    controller[ method.toLowerCase() ]
-                ).call(controller);
+            ).then(function(b) {
+                if (b) {
+                    let controllerResponse = $injectionBinder(
+                        controller[ method.toLowerCase() ]
+                    ).call(controller);
 
-                // Add data responder
-                render(name, controller, $request, $response);
-                $response.Controller.done(controller);
+                    // Add data responder
+                    return render(name, controller, $request, $response);
+                } else {
+
+                    // Write Bad Data
+                    new $CustomResponse().head(415, null);
+                    return true;
+                }
+            })then(function(b) {
+                if (b) {
+                    $response.Controller.done(controller);
+                } else {
+
+                    // Rendered Improperly
+                    new $CustomResponse().head(502, null);
+                }
+
             }).catch(function(e) {
-                // $LogProvider.error(e);
-                console.log('here');
-                new $ErrorResponse(e).head().write();
-                $response.Controller.done(controller);
+                return new $ErrorResponse(e).head();
             });
         } else {
-            return new $CustomResponse().head(405, null).write();
+            return new $CustomResponse().head(405, null);
         }
     };
 }
@@ -141,9 +153,13 @@ function serialize(name, controller, $request, $response) {
             }
         }
 
+
+        // TODO reject the promise here and throw an Invalid Data custom response
         if (!serializerValid) {
-            throw new $Exceptions.$$UnsuccessfulDataSerializationError();
+            return false;
         }
+
+        return true;
     });
 }
 

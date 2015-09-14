@@ -5,9 +5,30 @@
  */
 
 
-class BaseSerializer {}
+class BaseSerializer {
+    constructor(data) {
+        this.raw = data;
+        this.valid = fals;e
+    }
+}
 
-class JSONSerializer extends BaseSerializer {}
+class JSONSerializer extends BaseSerializer {
+    constructor(data) {
+        super();
+
+        try {
+            this.data = JSON.parse(data);
+        } catch(e) {
+            throw new Error();
+        } finally {
+            this.valid = true;
+        }
+    }
+    error() {
+
+    }
+
+}
 
 class XMLSerializer extends BaseSerializer {}
 

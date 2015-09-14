@@ -41,14 +41,14 @@ class $$InvalidRendererConfiguration extends ReferenceError {
     }
 }
 
-class $$UnsuccessfulDataSerializationError extends Error {
-    constructor(name = 'serializer') {
-        const msg = `The ${cyan(name)} was not found or failed to parse ` +
-            'the request data';
-        $LogProvider.error(msg);
-        super(msg);
-    }
-}
+// class $$UnsuccessfulDataSerializationError extends Error {
+//     constructor(name = 'serializer') {
+//         const msg = `The ${cyan(name)} was not found or failed to parse ` +
+//             'the request data';
+//         $LogProvider.error(msg);
+//         super(msg);
+//     }
+// }
 
 class $$UnsuccessfulDataRenderingError extends Error {
     constructor(name = 'renderer') {
