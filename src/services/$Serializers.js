@@ -4,30 +4,27 @@
  * @date 9/8/2015
  */
 
-
 class BaseSerializer {
     constructor(data) {
         this.raw = data;
-        this.valid = fals;e
+        this.valid = false;
     }
 }
 
 class JSONSerializer extends BaseSerializer {
     constructor(data) {
-        super();
-
-        try {
-            this.data = JSON.parse(data);
-        } catch(e) {
-            throw new Error();
-        } finally {
+        super(data);
+        if (typeof data !== 'object') {
+            try {
+                this.data = JSON.parse(data);
+                this.valid = true;
+            } catch(e) {
+                throw new Error();
+            }
+        } else {
             this.valid = true;
         }
     }
-    error() {
-
-    }
-
 }
 
 class XMLSerializer extends BaseSerializer {}

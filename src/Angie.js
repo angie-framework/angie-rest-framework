@@ -59,8 +59,6 @@ function controllerWrapper(name, obj) {
 
         util._extend(controller, $scope);
 
-        // Add data retrieval
-
         let methodResponse;
         if (/options|head/i.test(method)) {
             if ($request.method === 'OPTIONS') {
@@ -76,9 +74,13 @@ function controllerWrapper(name, obj) {
                 $response
             ).then(function(b) {
                 if (b) {
+
+                    // TODO why can't you bind?
                     let controllerResponse = $injectionBinder(
                         controller[ method.toLowerCase() ]
                     ).call(controller);
+
+                    // TODO write data to the response
 
                     // Add data responder
                     return render(name, controller, $request, $response);
@@ -88,7 +90,7 @@ function controllerWrapper(name, obj) {
                     new $CustomResponse().head(415, null);
                     return true;
                 }
-            })then(function(b) {
+            }).then(function(b) {
                 if (b) {
                     $response.Controller.done(controller);
                 } else {
@@ -107,7 +109,7 @@ function controllerWrapper(name, obj) {
 }
 
 function serialize(name, controller, $request, $response) {
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
         let data = $request.body = $request.query;
         if ($request.method !== 'GET') {
             $request.body = '';
@@ -115,6 +117,7 @@ function serialize(name, controller, $request, $response) {
                 data += d;
                 if (data.length > 1E6) {
                     $request.connection.destroy();
+                    reject();
                 }
             });
             $request.on('end', () => resolve(data));
@@ -122,10 +125,13 @@ function serialize(name, controller, $request, $response) {
             resolve(data);
         }
     }).then(function(data) {
+
         // We have to serialize before we hit the method
-        let serializers = controller.serializer || $request.route.serializer ||
+        let serializers = controller.serializers || controller.serializer ||
+                $request.route.serializers || $request.route.serializer ||
                 global.app.$$config.defaultSerializers,
             serializerValid;
+        console.log(serializers);
         if (typeof serializers === 'string') {
             serializers = [ serializers ];
         }
@@ -139,6 +145,7 @@ function serialize(name, controller, $request, $response) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
+                    console.log(serializer);
                     serialized = new $Serializers[ serializer ](data);
                 } else {
                     throw new $Exceptions.$$UnsuccessfulDataSerializationError(

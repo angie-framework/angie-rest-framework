@@ -50,20 +50,20 @@ class $$InvalidRendererConfiguration extends ReferenceError {
 //     }
 // }
 
-class $$UnsuccessfulDataRenderingError extends Error {
-    constructor(name = 'renderer') {
-        const msg = `The ${cyan(name)} was not found or failed to render ` +
-            'the response data';
-        $LogProvider.error(msg);
-        super(msg);
-    }
-}
+// class $$UnsuccessfulDataRenderingError extends Error {
+//     constructor(name = 'renderer') {
+//         const msg = `The ${cyan(name)} was not found or failed to render ` +
+//             'the response data';
+//         $LogProvider.error(msg);
+//         super(msg);
+//     }
+// }
 
 export {
     $$MissingParentModuleError,
     $$InvalidRESTfulControllerError,
     $$InvalidSerializerConfiguration,
-    $$InvalidRendererConfiguration,
-    $$UnsuccessfulDataSerializationError,
-    $$UnsuccessfulDataRenderingError
+    $$InvalidRendererConfiguration //,
+    // $$UnsuccessfulDataSerializationError,
+    // $$UnsuccessfulDataRenderingError
 };
