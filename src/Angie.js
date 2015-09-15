@@ -74,16 +74,32 @@ function controllerWrapper(name, obj) {
                 $response
             ).then(function(b) {
                 if (b) {
+                    const RENDER = render.bind(
+                        null,
+                        name,
+                        controller,
+                        $request,
+                        $response
+                    );
+
+                    console.log('METHOD', controller[ method.toLowerCase() ]);
 
                     // TODO why can't you bind?
                     let controllerResponse = $injectionBinder(
                         controller[ method.toLowerCase() ]
                     ).call(controller);
 
-                    // TODO write data to the response
-
-                    // Add data responder
-                    return render(name, controller, $request, $response);
+                    if (controllerResponse &&
+                        controllerResponse.prototype &&
+                        controllerResponse.prototype.constructor === 'Promise'
+                    ) {
+                        return controllerResponse.then(function() {
+                            return RENDER();
+                        });
+                    } else {
+                        console.log('CALL RENDER');
+                        return RENDER();
+                    }
                 } else {
 
                     // Write Bad Data
@@ -131,7 +147,6 @@ function serialize(name, controller, $request, $response) {
                 $request.route.serializers || $request.route.serializer ||
                 global.app.$$config.defaultSerializers,
             serializerValid;
-        console.log(serializers);
         if (typeof serializers === 'string') {
             serializers = [ serializers ];
         }
@@ -145,12 +160,7 @@ function serialize(name, controller, $request, $response) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
-                    console.log(serializer);
                     serialized = new $Serializers[ serializer ](data);
-                } else {
-                    throw new $Exceptions.$$UnsuccessfulDataSerializationError(
-                        serializer
-                    );
                 }
 
                 if (serialized.valid) {
@@ -160,13 +170,10 @@ function serialize(name, controller, $request, $response) {
             }
         }
 
-
-        // TODO reject the promise here and throw an Invalid Data custom response
-        if (!serializerValid) {
-            return false;
+        if (serializerValid) {
+            return true;
         }
-
-        return true;
+        return false;
     });
 }
 
@@ -175,31 +182,34 @@ function render(name, controller, $request, $response) {
     // Render the response data
     let renderers = controller.renderer || $request.route.renderer ||
             global.app.$$config.defaultRenderers,
-        rendererValid;
+        rendererValid,
+        rendered;
+    if (typeof renderers === 'string') {
+        renderers = [ renderers ];
+    }
+
     if (!(renderers instanceof Array)) {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
     } else {
         for (let renderer of renderers) {
-            let rendered;
             if (
                 typeof renderer === 'string' &&
                 $Renderers.hasOwnProperty(renderer)
             ) {
-                rendered = new $Renderers[ renderer ];
-            } else {
-                throw new $Exceptions.$$UnsuccessfulDataRenderingError(
-                    renderer
-                );
+                rendered = new $Renderers[ renderer ]($response.$content);
+                console.log('RENDERED', rendered.valid);
             }
 
-            if (renderer.valid) {
+            if (rendered.valid) {
                 rendererValid = true;
                 break;
             }
         }
     }
 
-    if (!rendererValid) {
-        throw new $Exceptions.$$UnsuccessfulDataRenderingError();
+    if (rendererValid) {
+        $response.write(rendered.data);
+        return true;
     }
+    return false;
 }

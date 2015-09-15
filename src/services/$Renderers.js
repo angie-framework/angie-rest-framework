@@ -8,14 +8,14 @@
 import {default as $Injector} from     'angie-injector';
 
 // Project Modules
-import {default as $MimeTypes} from    '../node_modules/angie/dist/util/$MimeTypeProvider.js';
+import {default as $MimeTypes} from    '../../node_modules/angie/dist/util/$MimeTypeProvider.js';
 
 class BaseRenderer {
     constructor(dataType = 'text', data) {
         const $response = $Injector.get('$response');
-        $response.responseHeaders[ 'Content-Type' ] = $MimeTypes.$$(dataType);
+        $response.setHeader('Content-Type', $MimeTypes.$$(dataType));
         this.data = data;
-        valid = false;
+        this.valid = false;
     }
 }
 
@@ -45,7 +45,11 @@ class HTMLRenderer extends BaseRenderer {}
 
 export {
     JSONRenderer,
+    JSONRenderer as json,
     JSONPRenderer,
+    JSONPRenderer as jsonp,
     XMLRenderer,
-    HTMLRenderer
+    XMLRenderer as xml,
+    HTMLRenderer,
+    HTMLRenderer as html
 };
