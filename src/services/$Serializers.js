@@ -14,16 +14,18 @@ class BaseSerializer {
 class JSONSerializer extends BaseSerializer {
     constructor(data) {
         super(data);
-        if (typeof data !== 'object') {
-            try {
-                this.data = JSON.parse(data);
-                this.valid = true;
-            } catch(e) {
-                throw new Error();
+
+        console.log('IN SERIALIZER', data);
+
+        try {
+            if (typeof this.data === 'object') {
+
+                // Just validate that this works
+                this.data = JSON.stringify(data);
             }
-        } else {
+            this.data = JSON.parse(data);
             this.valid = true;
-        }
+        } catch(e) {}
     }
 }
 

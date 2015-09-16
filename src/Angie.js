@@ -10,7 +10,11 @@ import {
     $ErrorResponse,
     $CustomResponse
 } from                              '../node_modules/angie/dist/services/$Response';
-import {$injectionBinder} from      'angie-injector';
+import {
+    default as $Injector,
+    $injectionBinder,
+    $$arguments
+} from                              'angie-injector';
 import $LogProvider from            'angie-log';
 
 // Project Modules
@@ -57,7 +61,8 @@ function controllerWrapper(name, obj) {
         const controller = new obj($scope, $request, $response),
             method = $request.method;
 
-        util._extend(controller, $scope);
+        // Extend scope onto the controller?
+        // util._extend(controller, $scope);
 
         let methodResponse;
         if (/options|head/i.test(method)) {
@@ -73,6 +78,7 @@ function controllerWrapper(name, obj) {
                 $request,
                 $response
             ).then(function(b) {
+                console.log('B', b);
                 if (b) {
                     const RENDER = render.bind(
                         null,
@@ -82,12 +88,15 @@ function controllerWrapper(name, obj) {
                         $response
                     );
 
-                    console.log('METHOD', controller[ method.toLowerCase() ]);
+                    // This is a workaround for binding context to the controller
+                    // method
+                    let controllerResponse = (function() {
+                        const fn = controller[ method.toLowerCase() ],
+                            args = $Injector.get.apply(null, $$arguments(fn));
 
-                    // TODO why can't you bind?
-                    let controllerResponse = $injectionBinder(
-                        controller[ method.toLowerCase() ]
-                    ).call(controller);
+                        // This, not a copy needs to be explicitly called
+                        return controller[ method.toLowerCase() ](...args);
+                    })();
 
                     if (controllerResponse &&
                         controllerResponse.prototype &&
@@ -97,50 +106,47 @@ function controllerWrapper(name, obj) {
                             return RENDER();
                         });
                     } else {
-                        console.log('CALL RENDER');
                         return RENDER();
                     }
                 } else {
 
-                    // Write Bad Data
+                    console.log('NIIII');
+
+                    // Bad Data was provided to the method
                     new $CustomResponse().head(415, null);
+                    console.log('AFREE');
                     return true;
                 }
             }).then(function(b) {
-                if (b) {
-                    $response.Controller.done(controller);
-                } else {
+                console.log('BB', b);
+                if (!b) {
 
-                    // Rendered Improperly
+                    // Rendered Improperly, we need to express it
+                    // TODO bad data, should return nothing
+                    // $response.$content = undefined;
                     new $CustomResponse().head(502, null);
                 }
-
-            }).catch(function(e) {
-                return new $ErrorResponse(e).head();
-            });
+                $response.Controller.done(controller);
+            })
         } else {
-            return new $CustomResponse().head(405, null);
+
+            // The method requested has not been exposed on the controller
+            new $CustomResponse().head(405, null);
+            $response.Controller.done(controller);
         }
     };
 }
 
+/*
+ * @todo move data to request
+ */
 function serialize(name, controller, $request, $response) {
     return new Promise(function(resolve, reject) {
-        let data = $request.body = $request.query;
-        if ($request.method !== 'GET') {
-            $request.body = '';
-            $request.on('data', function(d) {
-                data += d;
-                if (data.length > 1E6) {
-                    $request.connection.destroy();
-                    reject();
-                }
-            });
-            $request.on('end', () => resolve(data));
-        } else {
-            resolve(data);
-        }
+        console.log('IN SERIALIZE');
+        resolve($request[ $request.method === 'GET' ? 'query' : 'body' ]);
     }).then(function(data) {
+
+        console.log('DATA TEST', data);
 
         // We have to serialize before we hit the method
         let serializers = controller.serializers || controller.serializer ||
@@ -160,8 +166,11 @@ function serialize(name, controller, $request, $response) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
+                    console.log('serializer', serializer);
                     serialized = new $Serializers[ serializer ](data);
                 }
+
+                console.log('SERIALIZED', serialized);
 
                 if (serialized.valid) {
                     serializerValid = true;
@@ -171,8 +180,10 @@ function serialize(name, controller, $request, $response) {
         }
 
         if (serializerValid) {
+            console.log('VALID');
             return true;
         }
+        console.log('INVALID');
         return false;
     });
 }
@@ -197,7 +208,6 @@ function render(name, controller, $request, $response) {
                 $Renderers.hasOwnProperty(renderer)
             ) {
                 rendered = new $Renderers[ renderer ]($response.$content);
-                console.log('RENDERED', rendered.valid);
             }
 
             if (rendered.valid) {

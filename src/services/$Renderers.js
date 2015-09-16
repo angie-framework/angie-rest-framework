@@ -23,16 +23,19 @@ class JSONRenderer extends BaseRenderer {
     constructor(data) {
         super('json', data);
 
-        // This doesn't have an else block. If we can't stringify it something
-        // is wrong
-        if (typeof this.data !== 'string') {
-            try {
-                this.data = JSON.stringify(this.data);
-                this.valid = true;
-            } catch(e) {
-                throw new Error();
+        console.log('DATA', data, typeof data);
+
+        // If we're working with a string, we have to tests that it is a valid
+        // JSON object
+        try {
+            if (typeof this.data === 'string') {
+
+                // Just validate that this works
+                this.data = JSON.parse(data);
             }
-        }
+            this.data = JSON.stringify(data);
+            this.valid = true;
+        } catch(e) {}
     }
 }
 
