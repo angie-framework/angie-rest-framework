@@ -67,11 +67,8 @@ class XMLRenderer extends BaseRenderer {
     constructor(data) {
         super('xml', data);
 
-        console.log('DATA', data);
-
         try {
             this.data = XML(data, OPTS);
-            console.log(this.data);
             this.valid = true;
         } catch(e) {}
     }

@@ -15,8 +15,9 @@ import {bold, red} from     'chalk';
 const bread = (str) => bold(red(str));
 
 const SRC_DIR = 'src',
-    SRC = `${SRC}/**/*.js`,
-    TRANSPILED_SRC = 'dist',
+    SRC = `${SRC_DIR}/**/*.js`,
+    TRANSPILED_SRC_DIR = 'dist',
+    TRANSPILED_SRC = '${}'
     TEST_SRC = 'test/**/*.spec.js',
     DOC_SRC = 'doc',
     COVERAGE_SRC = 'coverage';
