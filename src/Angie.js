@@ -10,8 +10,7 @@ import {
     $ErrorResponse,
     $CustomResponse
 } from                              '../node_modules/angie/dist/services/$Response';
-import {
-    default as $Injector,
+import $Injector, {
     $injectionBinder,
     $$arguments
 } from                              'angie-injector';
@@ -78,7 +77,6 @@ function controllerWrapper(name, obj) {
                 $request,
                 $response
             ).then(function(b) {
-                console.log('B', b);
                 if (b) {
                     const RENDER = render.bind(
                         null,
@@ -91,12 +89,15 @@ function controllerWrapper(name, obj) {
                     // This is a workaround for binding context to the controller
                     // method
                     let controllerResponse = (function() {
-                        const fn = controller[ method.toLowerCase() ],
-                            args = $Injector.get.apply(null, $$arguments(fn));
+                        const fn = controller[ method.toLowerCase() ];
+                        let args = $Injector.get($$arguments(fn), 'Controller');
+                        args = args instanceof Array ? args : [ args ];
 
                         // This, not a copy needs to be explicitly called
                         return controller[ method.toLowerCase() ](...args);
                     })();
+
+                    console.log('IMMA RENDER');
 
                     if (controllerResponse &&
                         controllerResponse.prototype &&
@@ -110,29 +111,22 @@ function controllerWrapper(name, obj) {
                     }
                 } else {
 
-                    console.log('NIIII');
-
                     // Bad Data was provided to the method
                     new $CustomResponse().head(415, null);
-                    console.log('AFREE');
                     return true;
                 }
             }).then(function(b) {
-                console.log('BB', b);
                 if (!b) {
 
                     // Rendered Improperly, we need to express it
-                    // TODO bad data, should return nothing
-                    // $response.$content = undefined;
                     new $CustomResponse().head(502, null);
                 }
                 $response.Controller.done(controller);
-            })
+            });
         } else {
 
             // The method requested has not been exposed on the controller
             new $CustomResponse().head(405, null);
-            $response.Controller.done(controller);
         }
     };
 }
@@ -141,12 +135,9 @@ function controllerWrapper(name, obj) {
  * @todo move data to request
  */
 function serialize(name, controller, $request, $response) {
-    return new Promise(function(resolve, reject) {
-        console.log('IN SERIALIZE');
-        resolve($request[ $request.method === 'GET' ? 'query' : 'body' ]);
-    }).then(function(data) {
-
-        console.log('DATA TEST', data);
+    return Promise.resolve(
+        $request[ $request.method === 'GET' ? 'query' : 'body' ]
+    ).then(function(data) {
 
         // We have to serialize before we hit the method
         let serializers = controller.serializers || controller.serializer ||
@@ -166,11 +157,8 @@ function serialize(name, controller, $request, $response) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
-                    console.log('serializer', serializer);
                     serialized = new $Serializers[ serializer ](data);
                 }
-
-                console.log('SERIALIZED', serialized);
 
                 if (serialized.valid) {
                     serializerValid = true;
@@ -179,45 +167,28 @@ function serialize(name, controller, $request, $response) {
             }
         }
 
-        if (serializerValid) {
-            console.log('VALID');
-            return true;
-        }
-        console.log('INVALID');
-        return false;
+        return serializerValid;
     });
 }
 
 function render(name, controller, $request, $response) {
+    console.log('IN RENDER');
 
     // Render the response data
-    let renderers = controller.renderer || $request.route.renderer ||
+    let renderer = controller.renderer || $request.route.renderer ||
             global.app.$$config.defaultRenderers,
-        rendererValid,
-        rendered;
-    if (typeof renderers === 'string') {
-        renderers = [ renderers ];
-    }
+        rendered = {};
 
-    if (!(renderers instanceof Array)) {
+    console.log('RENDERER', renderer);
+
+    if (typeof renderer !== 'string') {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
-    } else {
-        for (let renderer of renderers) {
-            if (
-                typeof renderer === 'string' &&
-                $Renderers.hasOwnProperty(renderer)
-            ) {
-                rendered = new $Renderers[ renderer ]($response.$content);
-            }
-
-            if (rendered.valid) {
-                rendererValid = true;
-                break;
-            }
-        }
+    } else if ($Renderers.hasOwnProperty(renderer)) {
+        console.log('IN REDERERER');
+        rendered = new $Renderers[ renderer ]($response.$content);
     }
 
-    if (rendererValid) {
+    if (rendered.valid) {
         $response.write(rendered.data);
         return true;
     }

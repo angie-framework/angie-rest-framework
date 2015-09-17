@@ -5,16 +5,24 @@
  */
 
 // System Modules
-import {default as $Injector} from     'angie-injector';
+import XML from                         'xml-object'
+import { default as $Injector } from    'angie-injector';
 
 // Project Modules
-import {default as $MimeTypes} from    '../../node_modules/angie/dist/util/$MimeTypeProvider.js';
+import { default as $MimeTypes } from    '../../node_modules/angie/dist/util/$MimeTypeProvider.js';
+
+const OPTS = {
+    declaration: true,
+    indent: true
+};
 
 class BaseRenderer {
     constructor(dataType = 'text', data) {
-        const $response = $Injector.get('$response');
-        $response.setHeader('Content-Type', $MimeTypes.$$(dataType));
-        this.data = data;
+        $Injector.get('$response').setHeader(
+            'Content-Type',
+            $MimeTypes.$$(dataType)
+        );
+        this.pre = data;
         this.valid = false;
     }
 }
@@ -23,28 +31,72 @@ class JSONRenderer extends BaseRenderer {
     constructor(data) {
         super('json', data);
 
-        console.log('DATA', data, typeof data);
-
         // If we're working with a string, we have to tests that it is a valid
         // JSON object
         try {
-            if (typeof this.data === 'string') {
+            if (typeof data === 'string') {
 
                 // Just validate that this works
                 this.data = JSON.parse(data);
             }
-            this.data = JSON.stringify(data);
+            this.data = JSON.stringify(this.data || data);
             this.valid = true;
         } catch(e) {}
     }
 }
 
-class JSONPRenderer extends BaseRenderer {}
+class JSONPRenderer extends JSONRenderer {
+    constructor(data) {
+        super(data);
 
-class XMLRenderer extends BaseRenderer {}
+        // Parent class MIME maps to json, we need js
+        $Injector.get('$response').setHeader(
+            'Content-Type',
+            $MimeTypes.$$('js')
+        );
 
-// TODO this just sets the template
-class HTMLRenderer extends BaseRenderer {}
+        let cb = this.pre ? this.pre.callback || this.pre.cb : null;
+
+        if (this.valid && cb) {
+            this.data = `${cb}(${this.data});`;
+        }
+    }
+}
+
+class XMLRenderer extends BaseRenderer {
+    constructor(data) {
+        super('xml', data);
+
+        console.log('DATA', data);
+
+        try {
+            this.data = XML(data, OPTS);
+            console.log(this.data);
+            this.valid = true;
+        } catch(e) {}
+    }
+}
+
+class HTMLRenderer extends BaseRenderer {
+    constructor(data) {
+        super('html', data);
+
+        // This guy is basically the answer to HTML in this plugin
+        // He just passes off the data to the route
+        $Injector.get('$response').route.template = data;
+    }
+}
+
+class TextRenderer extends BaseRenderer {
+    constructor(data) {
+        super(undefined, data);
+
+        this.data = data;
+        this.valid = true;
+    }
+}
+
+class RawRenderer extends BaseRenderer {}
 
 export {
     JSONRenderer,
@@ -54,5 +106,9 @@ export {
     XMLRenderer,
     XMLRenderer as xml,
     HTMLRenderer,
-    HTMLRenderer as html
+    HTMLRenderer as html,
+    TextRenderer,
+    TextRenderer as text,
+    RawRenderer,
+    RawRenderer as raw
 };

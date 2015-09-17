@@ -4,6 +4,10 @@
  * @date 9/8/2015
  */
 
+// System modules
+import XML from                         'pixl-xml';
+import { default as $Injector } from    'angie-injector';
+
 class BaseSerializer {
     constructor(data) {
         this.raw = data;
@@ -15,25 +19,52 @@ class JSONSerializer extends BaseSerializer {
     constructor(data) {
         super(data);
 
-        console.log('IN SERIALIZER', data);
-
         try {
-            if (typeof this.data === 'object') {
+            if (typeof data === 'object') {
 
                 // Just validate that this works
                 this.data = JSON.stringify(data);
             }
-            this.data = JSON.parse(data);
+            this.data = JSON.parse(this.data || data);
             this.valid = true;
         } catch(e) {}
     }
 }
 
-class XMLSerializer extends BaseSerializer {}
+class XMLSerializer extends BaseSerializer {
+    constructor(data) {
+        super(data);
 
-class FormDataSerializer extends BaseSerializer {}
+        try {
+            this.data = XML.parse(data);
+            this.valid = true;
+        } catch(e) {}
+    }
+}
 
-class TextSerializer extends BaseSerializer {}
+class FormDataSerializer extends BaseSerializer {
+    constructor(data) {
+        super();
+
+        let formData;
+        if (Object.keys(formData = $Injector.get('$request').formData).length) {
+            console.log('DATA ZEROS', formData['xxx']);
+            this.data = formData;
+            this.valid = true;
+        }
+
+    }
+}
+
+class TextSerializer extends BaseSerializer {
+    constructor(data) {
+        super();
+        this.data = data;
+        this.valid = true;
+    }
+}
+
+class RawSerializer extends TextSerializer {}
 
 export {
     JSONSerializer,
@@ -43,5 +74,7 @@ export {
     FormDataSerializer,
     FormDataSerializer as form,
     TextSerializer,
-    TextSerializer as text
+    TextSerializer as text,
+    RawSerializer,
+    RawSerializer as raw
 };
