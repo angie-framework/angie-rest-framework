@@ -17,7 +17,7 @@ const bread = (str) => bold(red(str));
 const SRC_DIR = 'src',
     SRC = `${SRC_DIR}/**/*.js`,
     TRANSPILED_SRC_DIR = 'dist',
-    TRANSPILED_SRC = '${}'
+    TRANSPILED_SRC = `${TRANSPILED_SRC_DIR}/**/*.js`,
     TEST_SRC = 'test/**/*.spec.js',
     DOC_SRC = 'doc',
     COVERAGE_SRC = 'coverage';

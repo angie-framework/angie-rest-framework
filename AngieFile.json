@@ -1,5 +1,5 @@
 {
-    "projectName": "template",
+    "projectName": "angie-rest-framework",
     "projectRoot": "./src",
     "development": false,
     "dependencies": [

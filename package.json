@@ -1,14 +1,11 @@
 {
   "name": "angie-rest-framework",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A RESTful API Implementation of the Angie Framework",
   "license": "MIT",
-  "bin": {
-    "angie-rest-framework": "bin/angie-rest-framework"
-  },
   "main": "dist/index.js",
   "private": false,
-  "preferGlobal": false,
+  "preferGlobal": true,
   "scripts": {
     "start": "node bin/angie-rest-framework-dist",
     "test": "gulp test",
@@ -19,12 +16,16 @@
     "babel-node": "*",
     "node": "*"
   },
+  "bin": {
+    "angie-rest-framework": "bin/angie-rest-framework",
+    "angie-rest-framework-dist": "bin/angie-rest-framework-dist"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/angie-mvc/angie-rest-framework"
+    "url": "https://github.com/angie-framework/angie-rest-framework"
   },
   "bugs": {
-    "url": "https://github.com/angie-mvc/angie-rest-framework"
+    "url": "https://github.com/angie-framework/angie-rest-framework"
   },
   "keywords": [
     "Angie",
@@ -32,12 +33,7 @@
     "REST",
     "MVC",
     "Framework",
-    "API",
-    "Dependency",
-    "Plugin",
-    "Extension",
-    "Addon",
-    "Package"
+    "API"
   ],
   "devDependencies": {
     "babel-eslint": "^3.1.17",
