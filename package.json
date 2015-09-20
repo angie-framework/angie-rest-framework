@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "private": false,
-  "preferGlobal": true,
+  "preferGlobal": false,
   "scripts": {
     "start": "node bin/angie-rest-framework-dist",
     "test": "gulp test",

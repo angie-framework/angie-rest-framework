@@ -5,16 +5,10 @@
  */
 
 // System Modules
-import util from                    'util';
-import {
-    $ErrorResponse,
-    $CustomResponse
-} from                              '../node_modules/angie/dist/services/$Response';
+import { $CustomResponse } from     '../node_modules/angie/dist/services/$Response';
 import $Injector, {
-    $injectionBinder,
     $$arguments
 } from                              'angie-injector';
-import $LogProvider from            'angie-log';
 
 // Project Modules
 import $APIRouteProvider from       './factories/$APIRouteProvider';
@@ -49,21 +43,20 @@ if (global.app && global.app.Controller) {
     throw new $Exceptions.$$MissingParentModuleError();
 }
 
-// TODO wrap each controller invocation with a reference to the next controller up
+/*
+ * @todo Extend $scope onto controller?
+ */
 function controllerWrapper(name, obj) {
-    const serializerNames = Object.keys($Serializers),
-        rendererNames = Object.keys($Renderers);
     return function($scope, $request, $response) {
 
         // Well...classes are kind of shitty sometimes
         // Keys on instantiated classes are non-enumerable...so
+        // jscs:disable
         const controller = new obj($scope, $request, $response),
             method = $request.method;
 
-        // Extend scope onto the controller?
-        // util._extend(controller, $scope);
+        // jscs:enable
 
-        let methodResponse;
         if (/options|head/i.test(method)) {
             if ($request.method === 'OPTIONS') {
                 $response.setHeader('Allow', HTTP_METHODS.filter(
@@ -74,8 +67,7 @@ function controllerWrapper(name, obj) {
             return serialize(
                 name,
                 controller,
-                $request,
-                $response
+                $request
             ).then(function(b) {
                 if (b) {
                     const RENDER = render.bind(
@@ -96,8 +88,6 @@ function controllerWrapper(name, obj) {
                         // This, not a copy needs to be explicitly called
                         return controller[ method.toLowerCase() ](...args);
                     })();
-
-                    console.log('IMMA RENDER');
 
                     if (controllerResponse &&
                         controllerResponse.prototype &&
@@ -133,8 +123,9 @@ function controllerWrapper(name, obj) {
 
 /*
  * @todo move data to request
+ * @toto validate inputs
  */
-function serialize(name, controller, $request, $response) {
+function serialize(name, controller, $request) {
     return Promise.resolve(
         $request[ $request.method === 'GET' ? 'query' : 'body' ]
     ).then(function(data) {
@@ -161,6 +152,7 @@ function serialize(name, controller, $request, $response) {
                 }
 
                 if (serialized.valid) {
+                    $request.data = serialized.data;
                     serializerValid = true;
                     break;
                 }
@@ -172,20 +164,16 @@ function serialize(name, controller, $request, $response) {
 }
 
 function render(name, controller, $request, $response) {
-    console.log('IN RENDER');
 
     // Render the response data
     let renderer = controller.renderer || $request.route.renderer ||
             global.app.$$config.defaultRenderers,
         rendered = {};
 
-    console.log('RENDERER', renderer);
-
     if (typeof renderer !== 'string') {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
     } else if ($Renderers.hasOwnProperty(renderer)) {
-        console.log('IN REDERERER');
-        rendered = new $Renderers[ renderer ]($response.$content);
+        rendered = new $Renderers[ renderer ]($response.acontent);
     }
 
     if (rendered.valid) {

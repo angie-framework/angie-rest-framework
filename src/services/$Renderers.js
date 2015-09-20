@@ -5,7 +5,7 @@
  */
 
 // System Modules
-import XML from                         'xml-object'
+import XML from                         'xml-object';
 import { default as $Injector } from    'angie-injector';
 
 // Project Modules

@@ -17,7 +17,7 @@ class $$MissingParentModuleError {
 }
 
 class $$InvalidRESTfulControllerError {
-    constructor(name) {
+    constructor(name = '') {
         const msg = `Invalid configuration for Controller ${cyan(name)}: ` +
             'Controller must be a valid JavaScript class with a constructor';
         $LogProvider.error(msg);
@@ -33,9 +33,9 @@ class $$InvalidSerializerConfiguration {
     }
 }
 
-class $$InvalidRendererConfiguration extends ReferenceError {
+class $$InvalidRendererConfiguration {
     constructor(name = '') {
-        const msg = `No renderers specified for Controller ${cyan(name)}`;
+        const msg = `No renderer specified for Controller ${cyan(name)}`;
         $LogProvider.error(msg);
         throw new ReferenceError(msg);
     }

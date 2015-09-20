@@ -43,12 +43,11 @@ class XMLSerializer extends BaseSerializer {
 }
 
 class FormDataSerializer extends BaseSerializer {
-    constructor(data) {
+    constructor() {
         super();
 
         let formData;
         if (Object.keys(formData = $Injector.get('$request').formData).length) {
-            console.log('DATA ZEROS', formData['xxx']);
             this.data = formData;
             this.valid = true;
         }
