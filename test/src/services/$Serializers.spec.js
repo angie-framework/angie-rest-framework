@@ -1,0 +1,4 @@
+
+describe('$Serializers', function() {
+
+});

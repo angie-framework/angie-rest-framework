@@ -1,5 +1,5 @@
 /**
- * @module serializers.js
+ * @module $Serializers.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 9/8/2015
  */

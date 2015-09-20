@@ -1,5 +1,5 @@
 /**
- * @module renderers.js
+ * @module $Renderers.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 9/8/2015
  */
@@ -17,7 +17,7 @@ const OPTS = {
 };
 
 class BaseRenderer {
-    constructor(dataType = 'text', data) {
+    constructor(data, dataType = 'text') {
         $Injector.get('$response').setHeader(
             'Content-Type',
             $MimeTypes.$$(dataType)
@@ -28,8 +28,8 @@ class BaseRenderer {
 }
 
 class JSONRenderer extends BaseRenderer {
-    constructor(data) {
-        super('json', data);
+    constructor(data = '') {
+        super(data, 'json');
 
         // If we're working with a string, we have to tests that it is a valid
         // JSON object
@@ -37,16 +37,16 @@ class JSONRenderer extends BaseRenderer {
             if (typeof data === 'string') {
 
                 // Just validate that this works
-                this.data = JSON.parse(data);
+                data = JSON.parse(data);
             }
-            this.data = JSON.stringify(this.data || data);
+            this.data = JSON.stringify(data);
             this.valid = true;
         } catch(e) {}
     }
 }
 
 class JSONPRenderer extends JSONRenderer {
-    constructor(data) {
+    constructor(data = '') {
         super(data);
 
         // Parent class MIME maps to json, we need js
@@ -55,19 +55,25 @@ class JSONPRenderer extends JSONRenderer {
             $MimeTypes.$$('js')
         );
 
+        // Extract the callback name for the request
         let cb = this.pre ? this.pre.callback || this.pre.cb : null;
-
         if (this.valid && cb) {
             this.data = `${cb}(${this.data});`;
+        } else {
+            delete this.data;
+            this.valid = false;
         }
     }
 }
 
 class XMLRenderer extends BaseRenderer {
-    constructor(data) {
-        super('xml', data);
+    constructor(data = '') {
+        super(data, 'xml');
 
         try {
+            if (typeof data === 'string') {
+                data = JSON.parse(data);
+            }
             this.data = XML(data, OPTS);
             this.valid = true;
         } catch(e) {}
@@ -75,17 +81,18 @@ class XMLRenderer extends BaseRenderer {
 }
 
 class HTMLRenderer extends BaseRenderer {
-    constructor(data) {
-        super('html', data);
+    constructor(data = '') {
+        super(data, 'html');
 
         // This guy is basically the answer to HTML in this plugin
         // He just passes off the data to the route
-        $Injector.get('$response').route.template = data;
+        this.data = `${/doctype/i.test(data) ? '' : '<!DOCTYPE html>'}${data}`;
+        this.valid = true;
     }
 }
 
 class TextRenderer extends BaseRenderer {
-    constructor(data) {
+    constructor(data = '') {
         super(undefined, data);
 
         this.data = data;
@@ -96,6 +103,7 @@ class TextRenderer extends BaseRenderer {
 class RawRenderer extends BaseRenderer {}
 
 export {
+    BaseRenderer,
     JSONRenderer,
     JSONRenderer as json,
     JSONPRenderer,
