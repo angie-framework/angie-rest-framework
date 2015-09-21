@@ -23,9 +23,9 @@ class JSONSerializer extends BaseSerializer {
             if (typeof data === 'object') {
 
                 // Just validate that this works
-                this.data = JSON.stringify(data);
+                data = JSON.stringify(data);
             }
-            this.data = JSON.parse(this.data || data);
+            this.data = JSON.parse(data);
             this.valid = true;
         } catch(e) {}
     }
@@ -46,12 +46,12 @@ class FormDataSerializer extends BaseSerializer {
     constructor() {
         super();
 
-        let formData;
-        if (Object.keys(formData = $Injector.get('$request').formData).length) {
+        const $request = $Injector.get('$request'),
+            formData = $request.formData;
+        if (typeof formData === 'object' && Object.keys(formData).length) {
             this.data = formData;
             this.valid = true;
         }
-
     }
 }
 
@@ -66,6 +66,7 @@ class TextSerializer extends BaseSerializer {
 class RawSerializer extends TextSerializer {}
 
 export {
+    BaseSerializer,
     JSONSerializer,
     JSONSerializer as json,
     XMLSerializer,
