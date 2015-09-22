@@ -3,7 +3,7 @@ import { expect } from          'chai';
 import simple, { mock } from    'simple-mock';
 
 // System Modules
-import $Injector from               'angie-injector';
+import $Injector from           'angie-injector';
 
 // Angie REST Framework Modules
 const $Serializers =            require('../../../src/services/$Serializers');

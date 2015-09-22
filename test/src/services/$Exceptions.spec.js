@@ -1,5 +1,5 @@
 // Test Modules
-import { expect } from          'chai';
+import { expect, assert } from  'chai';
 import simple, { mock } from    'simple-mock';
 
 // System Modules
@@ -15,18 +15,34 @@ describe('$Exceptions', function() {
     });
     afterEach(simple.restore);
     describe('$$MissingParentModuleError', function() {
-        it('constructor', function() {
-            expect(function() {
+        describe('constructor', function() {
+            afterEach(function() {
+                global.ANGIE_REST_FRAMEWORK_TEST_ENV = true;
+            });
+            it('test global test env setting', function() {
+                global.ANGIE_REST_FRAMEWORK_TEST_ENV = false;
+                expect(function() {
 
-                /* eslint-disable */
-                new $Exceptions.$$MissingParentModuleError();
+                    /* eslint-disable */
+                    new $Exceptions.$$MissingParentModuleError();
 
-                /* eslint-enable */
-            }).to.throw();
-            expect($LogProvider.error.calls[0].args[0]).to.eq(
-                'Angie REST Framework cannot be used outside Angie ' +
-                'dependency modules'
-            );
+                    /* eslint-enable */
+                }).to.throw();
+                expect($LogProvider.error.calls[0].args[0]).to.eq(
+                    'Angie REST Framework cannot be used outside Angie ' +
+                    'dependency modules'
+                );
+            });
+            it('test no global test env setting', function() {
+                expect((function() {
+
+                    /* eslint-disable */
+                    return new $Exceptions.$$MissingParentModuleError();
+
+                    /* eslint-enable */
+                })()).to.deep.eq({});
+                assert(!$LogProvider.error.called);
+            });
         });
     });
     describe('$$InvalidRESTfulControllerError', function() {

@@ -5,12 +5,14 @@
  */
 
 // System Modules
-import { default as $Injector } from 'angie-injector';
+import $Injector from   'angie-injector';
 
 const $RouteProvider = $Injector.get('$Routes');
 
 class $APIRouteProvider extends $RouteProvider {
     static when(p, obj) {
+
+        console.log('SUPER', super.when);
 
         // We cannot have templates of any sort on the controllers
         delete obj.template;

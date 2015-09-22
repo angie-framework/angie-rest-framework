@@ -9,10 +9,12 @@ import $LogProvider from    'angie-log';
 
 class $$MissingParentModuleError {
     constructor() {
-        const msg = 'Angie REST Framework cannot be used outside Angie ' +
-            'dependency modules';
-        $LogProvider.error(msg);
-        throw new Error(msg);
+        if (global.ANGIE_REST_FRAMEWORK_TEST_ENV === false) {
+            const msg = 'Angie REST Framework cannot be used outside Angie ' +
+                'dependency modules';
+            $LogProvider.error(msg);
+            throw new Error(msg);
+        }
     }
 }
 

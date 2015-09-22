@@ -41,7 +41,7 @@ gulp.task('jscs', [ 'eslint' ], function () {
         }));
 });
 gulp.task('istanbul', [ 'jscs' ], function(cb) {
-    gulp.src('src/**/*.js').pipe(istanbul({
+    gulp.src(SRC).pipe(istanbul({
         instrumenter: Instrumenter,
         includeUntested: true,
         babel: {
@@ -50,10 +50,7 @@ gulp.task('istanbul', [ 'jscs' ], function(cb) {
     })).pipe(istanbul.hookRequire()).on('finish', cb);
 });
 gulp.task('mocha', [ 'istanbul' ], function() {
-    return gulp.src([
-        'test/src/testUtil.spec.js',
-        'test/**/*.spec.js'
-    ]).pipe(mocha({
+    return gulp.src(TEST_SRC).pipe(mocha({
         reporter: 'spec'
     })).pipe(istanbul.writeReports({
         dir: 'coverage',

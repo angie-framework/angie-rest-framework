@@ -11,7 +11,6 @@ import $Injector, {
 } from                              'angie-injector';
 
 // Project Modules
-import $APIRouteProvider from       './factories/$APIRouteProvider';
 import * as $Serializers from       './services/$Serializers';
 import * as $Renderers from         './services/$Renderers';
 import * as $Exceptions from        './services/$Exceptions';
@@ -27,8 +26,9 @@ const HTTP_METHODS = [
 
 // At this point, global.app needs to exist to invoke this
 if (global.app && global.app.Controller) {
-    global.app
-        .constant('HTTP_METHODS', HTTP_METHODS)
+    const $APIRouteProvider = require('./factories/$APIRouteProvider');
+
+    global.app.constant('HTTP_METHODS', HTTP_METHODS)
         .factory('$APIRoutes', $APIRouteProvider);
     global.app.controller = global.app.Controller = function(name, obj) {
         if (!(obj.prototype && obj.prototype.constructor)) {
@@ -182,3 +182,9 @@ function render(name, controller, $request, $response) {
     }
     return false;
 }
+
+export {
+    controllerWrapper as $$controllerWrapper,
+    serialize as $$serialize,
+    render as $$render
+};
