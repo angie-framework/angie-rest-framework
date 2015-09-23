@@ -21,7 +21,7 @@ describe('$Renderers', function() {
     describe('BaseRenderer', function() {
         describe('contructor', function() {
             it('test without dataType', function() {
-                const base = new $Renderers.BaseRenderer('test');
+                const base = new $Renderers.$$BaseRenderer('test');
                 expect(
                     setHeader.calls[0].args
                 ).to.deep.eq([ 'Content-Type', 'text/plain' ]);
@@ -29,7 +29,7 @@ describe('$Renderers', function() {
                 expect(base.valid).to.be.false;
             });
             it('test with dataType', function() {
-                const base = new $Renderers.BaseRenderer('test', 'xml');
+                const base = new $Renderers.$$BaseRenderer('test', 'xml');
                 expect(
                     setHeader.calls[0].args
                 ).to.deep.eq([ 'Content-Type', 'application/xml' ]);

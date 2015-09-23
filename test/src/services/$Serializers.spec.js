@@ -13,7 +13,7 @@ describe('$Serializers', function() {
 
     describe('BaseSerializer', function() {
         it('constructor', function() {
-            const base = new $Serializers.BaseSerializer(data);
+            const base = new $Serializers.$$BaseSerializer(data);
             expect(base.raw).to.eq(data);
             expect(base.valid).to.be.false;
         });

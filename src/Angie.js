@@ -131,10 +131,14 @@ function serialize(name, controller, $request) {
     ).then(function(data) {
 
         // We have to serialize before we hit the method
-        let serializers = controller.serializers || controller.serializer ||
-                $request.route.serializers || $request.route.serializer ||
-                global.app.$$config.defaultSerializers,
-            serializerValid;
+        let serializers =
+                controller.serializers ||
+                controller.serializer ||
+                $request.route.serializers ||
+                $request.route.serializer ||
+                global.app.$$config.defaultSerializers ||
+                global.app.$$config.defaultSerializer,
+            serializerValid = false;
         if (typeof serializers === 'string') {
             serializers = [ serializers ];
         }
@@ -167,13 +171,13 @@ function render(name, controller, $request, $response) {
 
     // Render the response data
     let renderer = controller.renderer || $request.route.renderer ||
-            global.app.$$config.defaultRenderers,
+            global.app.$$config.defaultRenderer,
         rendered = {};
 
     if (typeof renderer !== 'string') {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
     } else if ($Renderers.hasOwnProperty(renderer)) {
-        rendered = new $Renderers[ renderer ]($response.acontent);
+        rendered = new $Renderers[ renderer ]($response.content);
     }
 
     if (rendered.valid) {

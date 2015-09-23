@@ -26,6 +26,9 @@ class _Promise {
             val: proms
         };
     }
+    static resolve(val) {
+        return new _Promise(r => r(val));
+    }
 }
 
 /* eslint-disable */

@@ -66,7 +66,7 @@ class TextSerializer extends BaseSerializer {
 class RawSerializer extends TextSerializer {}
 
 export {
-    BaseSerializer,
+    BaseSerializer as $$BaseSerializer,
     JSONSerializer,
     JSONSerializer as json,
     XMLSerializer,

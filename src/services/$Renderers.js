@@ -9,7 +9,7 @@ import XML from                         'xml-object';
 import { default as $Injector } from    'angie-injector';
 
 // Project Modules
-import { default as $MimeTypes } from    '../../node_modules/angie/dist/util/$MimeTypeProvider.js';
+import { default as $MimeTypes } from    '../../node_modules/angie/dist/util/$MimeTypeProvider';
 
 const OPTS = {
     declaration: true,
@@ -93,7 +93,7 @@ class HTMLRenderer extends BaseRenderer {
 
 class TextRenderer extends BaseRenderer {
     constructor(data = '') {
-        super(undefined, data);
+        super(data);
 
         this.data = data;
         this.valid = true;
@@ -103,7 +103,7 @@ class TextRenderer extends BaseRenderer {
 class RawRenderer extends BaseRenderer {}
 
 export {
-    BaseRenderer,
+    BaseRenderer as $$BaseRenderer,
     JSONRenderer,
     JSONRenderer as json,
     JSONPRenderer,

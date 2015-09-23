@@ -12,8 +12,6 @@ const $RouteProvider = $Injector.get('$Routes');
 class $APIRouteProvider extends $RouteProvider {
     static when(p, obj) {
 
-        console.log('SUPER', super.when);
-
         // We cannot have templates of any sort on the controllers
         delete obj.template;
         delete obj.templatePath;
