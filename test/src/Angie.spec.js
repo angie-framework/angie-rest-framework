@@ -9,11 +9,9 @@ import $Injector from               'angie-injector';
 global.ANGIE_REST_FRAMEWORK_TEST_ENV = true;
 
 // Angie REST Framework Modules
-import {
-    // BaseResponse,
-    $CustomResponse
-} from                              '../../node_modules/angie/dist/services/$Response';
-import * as Angie from              '../../src/Angie';
+import { $CustomResponse } from     '../../node_modules/angie/dist/services/$Response';
+
+const Angie =                       require(`../../${global.TEST_ENV}/Angie`);
 
 describe('Angie', function() {
     describe('controllerWrapper', function() {

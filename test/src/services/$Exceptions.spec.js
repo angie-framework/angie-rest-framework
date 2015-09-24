@@ -7,7 +7,7 @@ import { cyan } from            'chalk';
 import $LogProvider from        'angie-log';
 
 // Angie REST Framework Modules
-const $Exceptions =             require('../../../src/services/$Exceptions');
+const $Exceptions =             require(`../../../${global.TEST_ENV}/services/$Exceptions`);
 
 describe('$Exceptions', function() {
     beforeEach(function() {

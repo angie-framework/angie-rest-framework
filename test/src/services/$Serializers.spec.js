@@ -6,7 +6,7 @@ import simple, { mock } from    'simple-mock';
 import $Injector from           'angie-injector';
 
 // Angie REST Framework Modules
-const $Serializers =            require('../../../src/services/$Serializers');
+const $Serializers =            require(`../../../${global.TEST_ENV}/services/$Serializers`);
 
 describe('$Serializers', function() {
     const data = { test: 'test' };

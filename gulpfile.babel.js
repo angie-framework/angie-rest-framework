@@ -86,8 +86,8 @@ gulp.task('bump', function() {
             throw new Error(bread('Version has no entry in CHANGELOG.md'));
         }
 
-        bump('bin/angie-template');
-        bump('bin/angie-template-dist');
+        bump('bin/angie-rest-framework');
+        bump('bin/angie-rest-framework-dist');
         bump('package.json');
     } else {
         throw new Error(bread('No version specified!!'));

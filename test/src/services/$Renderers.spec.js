@@ -6,7 +6,7 @@ import simple, { mock, spy } from   'simple-mock';
 import $Injector from               'angie-injector';
 
 // Angie REST Framework Modules
-const $Renderers =                  require('../../../src/services/$Renderers');
+const $Renderers =                  require(`../../../${global.TEST_ENV}/services/$Renderers`);
 
 describe('$Renderers', function() {
     let setHeader;

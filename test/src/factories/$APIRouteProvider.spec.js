@@ -3,7 +3,7 @@ import { expect } from          'chai';
 import simple, { mock } from    'simple-mock';
 
 // Angie REST Framework Modules
-import $APIRouteProvider from   '../../../src/factories/$APIRouteProvider';
+const $APIRouteProvider =       require(`../../../${global.TEST_ENV}/factories/$APIRouteProvider`);
 
 describe('$APIRouteProvider', function() {
     describe('when', function() {
