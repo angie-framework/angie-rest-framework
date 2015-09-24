@@ -69,7 +69,7 @@ describe('Angie', function() {
             assert(controllerClassSpy.called);
             assert(!setHeader.called);
         });
-        it('test 405 called when unexposed method is called', function() {
+        xit('test 405 called when unexposed method is called', function() {
             request.method = 'PUT';
             Angie.$$controllerWrapper('test', Controller)({}, request, response);
             assert(controllerClassSpy.called);
