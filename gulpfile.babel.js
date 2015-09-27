@@ -40,27 +40,19 @@ gulp.task('jscs', [ 'eslint' ], function () {
             esnext: true
         }));
 });
-gulp.task('istanbul', [ 'jscs' ], function(cb) {
-    gulp.src(SRC).pipe(istanbul({
-        instrumenter: Instrumenter,
-        includeUntested: true,
-        babel: {
-            stage: 0
-        }
-    })).pipe(istanbul.hookRequire()).on('finish', cb);
-});
-gulp.task('mocha', [ 'istanbul' ], function() {
-    return gulp.src(TEST_SRC).pipe(mocha({
-        reporter: 'spec'
-    })).pipe(istanbul.writeReports({
-        dir: 'coverage',
-        reportOpts: {
-            dir: 'coverage'
-        },
-        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
-    }));
-});
-gulp.task('cobertura', [ 'mocha' ], function(cb) {
+gulp.task('istanbul:src', [ 'jscs' ], istanbulHandler.bind(null, SRC));
+gulp.task('istanbul:dist', istanbulHandler.bind(null, TRANSPILED_SRC));
+gulp.task(
+    'mocha:src',
+    [ 'istanbul:src' ],
+    mochaHandler.bind(null, 'src', COVERAGE_SRC)
+);
+gulp.task(
+    'mocha:dist',
+    [ 'istanbul:dist' ],
+    mochaHandler.bind(null, 'dist', undefined)
+);
+gulp.task('cobertura', [ 'mocha:src' ], function(cb) {
     cobertura('coverage/cobertura-coverage.xml', 'svg', cb);
 });
 gulp.task('esdoc', [ 'cobertura' ], function() {
@@ -102,5 +94,27 @@ gulp.task('watch', [ 'test' ], function() {
 gulp.task('watch:babel', [ 'babel' ], function() {
     gulp.watch([ 'src/**' ], [ 'babel' ]);
 });
-gulp.task('default', [ 'babel' ]);
+gulp.task('default', [ 'cobertura', 'babel', 'esdoc' ]);
 
+function istanbulHandler(src, cb) {
+    gulp.src(src).pipe(istanbul({
+        instrumenter: Instrumenter,
+        includeUntested: true,
+        babel: {
+            stage: 0
+        }
+    })).pipe(istanbul.hookRequire()).on('finish', cb);
+}
+
+function mochaHandler(src, coverage = '/tmp') {
+    global.TEST_ENV = src;
+    return gulp.src(TEST_SRC).pipe(mocha({
+        reporter: 'spec'
+    })).pipe(istanbul.writeReports({
+        dir: coverage,
+        reportOpts: {
+            dir: coverage
+        },
+        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
+    }));
+}

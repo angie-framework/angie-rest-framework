@@ -8,3 +8,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added Serializer Classes for serializing request data
 - Added Renderer Classes for rendering response data
 - Added tests
+- Added tests around transpiled distribution files
