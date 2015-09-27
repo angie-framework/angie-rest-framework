@@ -1,7 +1,6 @@
+![emblem](https://rawgit.com/angie-framework/angie/master/svg/angie.svg "emblem")
+
 ## Angie REST Framework
-
-![emblem](https://github.com/angie-framework/angie/blob/master/svg/angie.svg "emblem")
-
 RESTful API wrapper around Angie Framework Application Endpoints
 
 ![build status](https://travis-ci.org/benderTheCrime/angie-rest-framework.svg?branch=master "build status")
