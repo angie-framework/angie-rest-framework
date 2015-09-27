@@ -1,4 +1,4 @@
-![emblem](https://rawgit.com/angie-framework/angie/master/svg/angie.svg "emblem")
+![emblem](https://rawgit.com/angie-framework/angie-rest-framework/master/svg/angie.svg "emblem")
 
 ## Angie REST Framework
 RESTful API wrapper around Angie Framework Application Endpoints
