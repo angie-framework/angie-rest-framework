@@ -1,1 +1,0 @@
-Add all `factory` components to this directory.

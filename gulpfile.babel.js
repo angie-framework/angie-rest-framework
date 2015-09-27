@@ -15,8 +15,9 @@ import {bold, red} from     'chalk';
 const bread = (str) => bold(red(str));
 
 const SRC_DIR = 'src',
-    SRC = `${SRC}/**/*.js`,
-    TRANSPILED_SRC = 'dist',
+    SRC = `${SRC_DIR}/**/*.js`,
+    TRANSPILED_SRC_DIR = 'dist',
+    TRANSPILED_SRC = `${TRANSPILED_SRC_DIR}/**/*.js`,
     TEST_SRC = 'test/**/*.spec.js',
     DOC_SRC = 'doc',
     COVERAGE_SRC = 'coverage';
@@ -39,30 +40,19 @@ gulp.task('jscs', [ 'eslint' ], function () {
             esnext: true
         }));
 });
-gulp.task('istanbul', [ 'jscs' ], function(cb) {
-    gulp.src('src/**/*.js').pipe(istanbul({
-        instrumenter: Instrumenter,
-        includeUntested: true,
-        babel: {
-            stage: 0
-        }
-    })).pipe(istanbul.hookRequire()).on('finish', cb);
-});
-gulp.task('mocha', [ 'istanbul' ], function() {
-    return gulp.src([
-        'test/src/testUtil.spec.js',
-        'test/**/*.spec.js'
-    ]).pipe(mocha({
-        reporter: 'spec'
-    })).pipe(istanbul.writeReports({
-        dir: 'coverage',
-        reportOpts: {
-            dir: 'coverage'
-        },
-        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
-    }));
-});
-gulp.task('cobertura', [ 'mocha' ], function(cb) {
+gulp.task('istanbul:src', [ 'jscs' ], istanbulHandler.bind(null, SRC));
+gulp.task('istanbul:dist', istanbulHandler.bind(null, TRANSPILED_SRC));
+gulp.task(
+    'mocha:src',
+    [ 'istanbul:src' ],
+    mochaHandler.bind(null, 'src', COVERAGE_SRC)
+);
+gulp.task(
+    'mocha:dist',
+    [ 'istanbul:dist' ],
+    mochaHandler.bind(null, 'dist', undefined)
+);
+gulp.task('cobertura', [ 'mocha:src' ], function(cb) {
     cobertura('coverage/cobertura-coverage.xml', 'svg', cb);
 });
 gulp.task('esdoc', [ 'cobertura' ], function() {
@@ -74,13 +64,6 @@ gulp.task('babel', [ 'esdoc' ], function() {
     })).pipe(gulp.dest('dist'));
 });
 
-// Bundled Tasks
-gulp.task('test', [ 'mocha' ]);
-gulp.task('watch', [ 'test' ], function() {
-    gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
-});
-gulp.task('default', [ 'babel' ]);
-
 // Utility Tasks
 gulp.task('bump', function() {
     const version = argv.version,
@@ -91,14 +74,47 @@ gulp.task('bump', function() {
     if (version) {
 
         // Verify that the version is in the CHANGELOG
-        if (fs.readFileSync('.CHANGELOG.md', 'utf8').indexOf(version) === -1) {
+        if (fs.readFileSync('CHANGELOG.md', 'utf8').indexOf(version) === -1) {
             throw new Error(bread('Version has no entry in CHANGELOG.md'));
         }
 
-        bump('bin/angie-template');
-        bump('bin/angie-template-dist');
+        bump('bin/angie-rest-framework');
+        bump('bin/angie-rest-framework-dist');
         bump('package.json');
     } else {
         throw new Error(bread('No version specified!!'));
     }
 });
+
+// Bundled Tasks
+gulp.task('test', [ 'mocha:src' ]);
+gulp.task('watch', [ 'test' ], function() {
+    gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
+});
+gulp.task('watch:babel', [ 'babel' ], function() {
+    gulp.watch([ 'src/**' ], [ 'babel' ]);
+});
+gulp.task('default', [ 'cobertura', 'babel', 'esdoc' ]);
+
+function istanbulHandler(src, cb) {
+    gulp.src(src).pipe(istanbul({
+        instrumenter: Instrumenter,
+        includeUntested: true,
+        babel: {
+            stage: 0
+        }
+    })).pipe(istanbul.hookRequire()).on('finish', cb);
+}
+
+function mochaHandler(src, coverage = '/tmp') {
+    global.TEST_ENV = src;
+    return gulp.src(TEST_SRC).pipe(mocha({
+        reporter: 'spec'
+    })).pipe(istanbul.writeReports({
+        dir: coverage,
+        reportOpts: {
+            dir: coverage
+        },
+        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
+    }));
+}

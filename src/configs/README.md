@@ -1,1 +1,0 @@
-Add all `config` components to this directory.
