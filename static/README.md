@@ -1,1 +1,0 @@
-Add all static files to this directory (images/css/JavaScript/etc).

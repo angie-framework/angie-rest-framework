@@ -1,1 +1,0 @@
-Add all tests for `directive` components to this directory.
