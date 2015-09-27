@@ -5,16 +5,12 @@
  */
 
 // System Modules
-import util from                    'util';
-import {
-    $ErrorResponse,
-    $CustomResponse
-} from                              '../node_modules/angie/dist/services/$Response';
-import {$injectionBinder} from      'angie-injector';
-import $LogProvider from            'angie-log';
+import { $CustomResponse } from     '../node_modules/angie/dist/services/$Response';
+import $Injector, {
+    $$arguments
+} from                              'angie-injector';
 
 // Project Modules
-import $APIRouteProvider from       './factories/$APIRouteProvider';
 import * as $Serializers from       './services/$Serializers';
 import * as $Renderers from         './services/$Renderers';
 import * as $Exceptions from        './services/$Exceptions';
@@ -30,8 +26,9 @@ const HTTP_METHODS = [
 
 // At this point, global.app needs to exist to invoke this
 if (global.app && global.app.Controller) {
-    global.app
-        .constant('HTTP_METHODS', HTTP_METHODS)
+    const $APIRouteProvider = require('./factories/$APIRouteProvider');
+
+    global.app.constant('HTTP_METHODS', HTTP_METHODS)
         .factory('$APIRoutes', $APIRouteProvider);
     global.app.controller = global.app.Controller = function(name, obj) {
         if (!(obj.prototype && obj.prototype.constructor)) {
@@ -46,20 +43,27 @@ if (global.app && global.app.Controller) {
     throw new $Exceptions.$$MissingParentModuleError();
 }
 
-// TODO wrap each controller invocation with a reference to the next controller up
+/**
+ * @desc The function called instead of the default Angie Controller
+ * functionality. Instantiates the Controller class, checks for the `$request`
+ * method on the instantiated Controller, and serializes/renders accordingly.
+ * This function will offer default responses for "HEAD" and "OPTIONS" requests
+ * and will handle invalid serialization and rendering responses.
+ * @todo Extend $scope onto controller?
+ * @access private
+ * @since 0.0.1
+ */
 function controllerWrapper(name, obj) {
-    const serializerNames = Object.keys($Serializers),
-        rendererNames = Object.keys($Renderers);
     return function($scope, $request, $response) {
 
         // Well...classes are kind of shitty sometimes
         // Keys on instantiated classes are non-enumerable...so
+        // jscs:disable
         const controller = new obj($scope, $request, $response),
             method = $request.method;
 
-        util._extend(controller, $scope);
+        // jscs:enable
 
-        let methodResponse;
         if (/options|head/i.test(method)) {
             if ($request.method === 'OPTIONS') {
                 $response.setHeader('Allow', HTTP_METHODS.filter(
@@ -70,72 +74,83 @@ function controllerWrapper(name, obj) {
             return serialize(
                 name,
                 controller,
-                $request,
-                $response
+                $request
             ).then(function(b) {
                 if (b) {
+                    const RENDER = render.bind(
+                        null, name, controller, $request, $response
+                    );
 
-                    // TODO why can't you bind?
-                    let controllerResponse = $injectionBinder(
-                        controller[ method.toLowerCase() ]
-                    ).call(controller);
+                    // This is a workaround for binding context to the controller
+                    // method
+                    let controllerResponse = (function() {
+                        const fn = controller[ method.toLowerCase() ];
+                        let args = $Injector.get($$arguments(fn), 'Controller');
+                        args = args instanceof Array ? args : [ args ];
 
-                    // TODO write data to the response
+                        // This, not a copy needs to be explicitly called
+                        return controller[ method.toLowerCase() ](...args);
+                    })();
 
-                    // Add data responder
-                    return render(name, controller, $request, $response);
+                    // Handle async Controller method responses
+                    if (controllerResponse &&
+                        controllerResponse.prototype &&
+                        controllerResponse.prototype.constructor === 'Promise'
+                    ) {
+                        return controllerResponse.then(function() {
+                            return RENDER();
+                        });
+                    } else {
+                        return RENDER();
+                    }
                 } else {
 
-                    // Write Bad Data
+                    // Bad Data was provided to the method
                     new $CustomResponse().head(415, null);
                     return true;
                 }
             }).then(function(b) {
-                if (b) {
-                    $response.Controller.done(controller);
-                } else {
+                if (!b) {
 
-                    // Rendered Improperly
+                    // Rendered Improperly, we need to express it
                     new $CustomResponse().head(502, null);
                 }
-
-            }).catch(function(e) {
-                return new $ErrorResponse(e).head();
+                $response.Controller.done(controller);
             });
         } else {
-            return new $CustomResponse().head(405, null);
+
+            // The method requested has not been exposed on the controller
+            new $CustomResponse().head(405, null);
         }
     };
 }
 
-function serialize(name, controller, $request, $response) {
-    return new Promise(function(resolve, reject) {
-        let data = $request.body = $request.query;
-        if ($request.method !== 'GET') {
-            $request.body = '';
-            $request.on('data', function(d) {
-                data += d;
-                if (data.length > 1E6) {
-                    $request.connection.destroy();
-                    reject();
-                }
-            });
-            $request.on('end', () => resolve(data));
-        } else {
-            resolve(data);
-        }
-    }).then(function(data) {
+/**
+ * @desc Finds serializers and performs data serialization
+ * @access private
+ * @since 0.0.1
+*/
+function serialize(name, controller, $request) {
+    return Promise.resolve(
+        $request[ $request.method === 'GET' ? 'query' : 'body' ]
+    ).then(function(data) {
 
         // We have to serialize before we hit the method
-        let serializers = controller.serializers || controller.serializer ||
-                $request.route.serializers || $request.route.serializer ||
-                global.app.$$config.defaultSerializers,
-            serializerValid;
-        console.log(serializers);
+        let serializers =
+                controller.serializers ||
+                controller.serializer ||
+                $request.route.serializers ||
+                $request.route.serializer ||
+                global.app.$$config.defaultSerializers ||
+                global.app.$$config.defaultSerializer,
+            serializerValid = false;
+
+        // If we have a single serializer
         if (typeof serializers === 'string') {
             serializers = [ serializers ];
         }
 
+        // If not an Array at this point, our serializers are invalid
         if (!(serializers instanceof Array)) {
             throw new $Exceptions.$$InvalidSerializerConfiguration(name);
         } else {
@@ -145,61 +160,62 @@ function serialize(name, controller, $request, $response) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
-                    console.log(serializer);
+
+                    // Call the serializer if it exists
                     serialized = new $Serializers[ serializer ](data);
-                } else {
-                    throw new $Exceptions.$$UnsuccessfulDataSerializationError(
-                        serializer
-                    );
                 }
 
                 if (serialized.valid) {
+
+                    // Move the valid data on to `$request`.
+                    $request.data = serialized.data;
                     serializerValid = true;
+
+                    // Break on our first found valid serializer
                     break;
                 }
             }
         }
 
-
-        // TODO reject the promise here and throw an Invalid Data custom response
-        if (!serializerValid) {
-            return false;
-        }
-
-        return true;
+        // Return serializer valid or invalid
+        return serializerValid;
     });
 }
 
+/**
+ * @desc Finds renderers and performs data rendering
+ * @access private
+ * @since 0.0.1
+*/
 function render(name, controller, $request, $response) {
 
     // Render the response data
-    let renderers = controller.renderer || $request.route.renderer ||
-            global.app.$$config.defaultRenderers,
-        rendererValid;
-    if (!(renderers instanceof Array)) {
+    let renderer =
+            controller.renderer ||
+            $request.route.renderer ||
+            global.app.$$config.defaultRenderer,
+        rendered = {};
+
+    // If no serializer found at this point, our renderer is invalid
+    if (typeof renderer !== 'string') {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
-    } else {
-        for (let renderer of renderers) {
-            let rendered;
-            if (
-                typeof renderer === 'string' &&
-                $Renderers.hasOwnProperty(renderer)
-            ) {
-                rendered = new $Renderers[ renderer ];
-            } else {
-                throw new $Exceptions.$$UnsuccessfulDataRenderingError(
-                    renderer
-                );
-            }
+    } else if ($Renderers.hasOwnProperty(renderer)) {
 
-            if (renderer.valid) {
-                rendererValid = true;
-                break;
-            }
-        }
+        // Call the renderer if it exists
+        rendered = new $Renderers[ renderer ]($response.content);
     }
 
-    if (!rendererValid) {
-        throw new $Exceptions.$$UnsuccessfulDataRenderingError();
+    if (rendered.valid) {
+
+        // Write the data to the response if the renderer was successful
+        $response.write(rendered.data);
+        return true;
     }
+    return false;
 }
+
+export {
+    controllerWrapper as $$controllerWrapper,
+    serialize as $$serialize,
+    render as $$render
+};

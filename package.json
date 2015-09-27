@@ -1,11 +1,8 @@
 {
   "name": "angie-rest-framework",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A RESTful API Implementation of the Angie Framework",
   "license": "MIT",
-  "bin": {
-    "angie-rest-framework": "bin/angie-rest-framework"
-  },
   "main": "dist/index.js",
   "private": false,
   "preferGlobal": false,
@@ -19,12 +16,16 @@
     "babel-node": "*",
     "node": "*"
   },
+  "bin": {
+    "angie-rest-framework": "bin/angie-rest-framework",
+    "angie-rest-framework-dist": "bin/angie-rest-framework-dist"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/angie-mvc/angie-rest-framework"
+    "url": "https://github.com/angie-framework/angie-rest-framework"
   },
   "bugs": {
-    "url": "https://github.com/angie-mvc/angie-rest-framework"
+    "url": "https://github.com/angie-framework/angie-rest-framework"
   },
   "keywords": [
     "Angie",
@@ -32,12 +33,7 @@
     "REST",
     "MVC",
     "Framework",
-    "API",
-    "Dependency",
-    "Plugin",
-    "Extension",
-    "Addon",
-    "Package"
+    "API"
   ],
   "devDependencies": {
     "babel-eslint": "^3.1.17",
@@ -57,10 +53,13 @@
     "yargs": "3.8.0"
   },
   "dependencies": {
-    "angie": "^0.3.3",
+    "angie": "^0.4.0",
+    "angie-injector": "^0.9.14",
     "angie-log": "^0.9.11",
     "babel": "^5.6.23",
     "babel-core": "5.6.15",
-    "chalk": "1.0.0"
+    "chalk": "1.0.0",
+    "pixl-xml": "^1.0.4",
+    "xml-object": "^0.1.0"
   }
 }

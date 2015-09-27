@@ -1,1 +1,0 @@
-Add all template files to this directory (html/etc).
