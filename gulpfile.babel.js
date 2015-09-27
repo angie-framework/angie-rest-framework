@@ -87,7 +87,7 @@ gulp.task('bump', function() {
 });
 
 // Bundled Tasks
-gulp.task('test', [ 'mocha' ]);
+gulp.task('test', [ 'mocha:src' ]);
 gulp.task('watch', [ 'test' ], function() {
     gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
 });
