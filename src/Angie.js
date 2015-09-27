@@ -43,8 +43,15 @@ if (global.app && global.app.Controller) {
     throw new $Exceptions.$$MissingParentModuleError();
 }
 
-/*
+/**
+ * @desc The function called instead of the default Angie Controller
+ * functionality. Instantiates the Controller class, checks for the `$request`
+ * method on the instantiated Controller, and serializes/renders accordingly.
+ * This function will offer default responses for "HEAD" and "OPTIONS" requests
+ * and will handle invalid serialization and rendering responses.
  * @todo Extend $scope onto controller?
+ * @access private
+ * @since 0.0.1
  */
 function controllerWrapper(name, obj) {
     return function($scope, $request, $response) {
@@ -71,11 +78,7 @@ function controllerWrapper(name, obj) {
             ).then(function(b) {
                 if (b) {
                     const RENDER = render.bind(
-                        null,
-                        name,
-                        controller,
-                        $request,
-                        $response
+                        null, name, controller, $request, $response
                     );
 
                     // This is a workaround for binding context to the controller
@@ -89,6 +92,7 @@ function controllerWrapper(name, obj) {
                         return controller[ method.toLowerCase() ](...args);
                     })();
 
+                    // Handle async Controller method responses
                     if (controllerResponse &&
                         controllerResponse.prototype &&
                         controllerResponse.prototype.constructor === 'Promise'
@@ -121,10 +125,11 @@ function controllerWrapper(name, obj) {
     };
 }
 
-/*
- * @todo move data to request
- * @toto validate inputs
- */
+/**
+ * @desc Finds serializers and performs data serialization
+ * @access private
+ * @since 0.0.1
+*/
 function serialize(name, controller, $request) {
     return Promise.resolve(
         $request[ $request.method === 'GET' ? 'query' : 'body' ]
@@ -139,10 +144,13 @@ function serialize(name, controller, $request) {
                 global.app.$$config.defaultSerializers ||
                 global.app.$$config.defaultSerializer,
             serializerValid = false;
+
+        // If we have a single serializer
         if (typeof serializers === 'string') {
             serializers = [ serializers ];
         }
 
+        // If not an Array at this point, our serializers are invalid
         if (!(serializers instanceof Array)) {
             throw new $Exceptions.$$InvalidSerializerConfiguration(name);
         } else {
@@ -152,35 +160,54 @@ function serialize(name, controller, $request) {
                     typeof serializer === 'string' &&
                     $Serializers.hasOwnProperty(serializer)
                 ) {
+
+                    // Call the serializer if it exists
                     serialized = new $Serializers[ serializer ](data);
                 }
 
                 if (serialized.valid) {
+
+                    // Move the valid data on to `$request`.
                     $request.data = serialized.data;
                     serializerValid = true;
+
+                    // Break on our first found valid serializer
                     break;
                 }
             }
         }
 
+        // Return serializer valid or invalid
         return serializerValid;
     });
 }
 
+/**
+ * @desc Finds renderers and performs data rendering
+ * @access private
+ * @since 0.0.1
+*/
 function render(name, controller, $request, $response) {
 
     // Render the response data
-    let renderer = controller.renderer || $request.route.renderer ||
+    let renderer =
+            controller.renderer ||
+            $request.route.renderer ||
             global.app.$$config.defaultRenderer,
         rendered = {};
 
+    // If no serializer found at this point, our renderer is invalid
     if (typeof renderer !== 'string') {
         throw new $Exceptions.$$InvalidRendererConfiguration(name);
     } else if ($Renderers.hasOwnProperty(renderer)) {
+
+        // Call the renderer if it exists
         rendered = new $Renderers[ renderer ]($response.content);
     }
 
     if (rendered.valid) {
+
+        // Write the data to the response if the renderer was successful
         $response.write(rendered.data);
         return true;
     }
