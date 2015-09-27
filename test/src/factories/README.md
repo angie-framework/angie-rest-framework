@@ -1,1 +1,0 @@
-Add all tests for `factory` components to this directory.

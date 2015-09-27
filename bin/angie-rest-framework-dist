@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+'use strict';
+
+// TODO check to see that the most up to date version is installed
+global.ANGIE_REST_FRAMEWORK_VERSION = '0.0.2';
+global.ANGIE_REST_FRAMEWORK_TEST_ENV = false;
+
+require('babel/register')({ ignore: false });
+require('../dist/index');
