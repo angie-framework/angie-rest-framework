@@ -11,7 +11,7 @@ RESTful API wrapper around Angie Framework Application Endpoints
 ![code coverage](https://rawgit.com/benderTheCrime/angie-rest-framework/master/svg/coverage.svg "code coverage")
 [![documentation](https://doc.esdoc.org/github.com/angie-framework/angie-rest-framework/badge.svg)](https://doc.esdoc.org/github.com/angie-framework/angie-rest-framework/ "documentation")
 
-[![NPM](https://nodei.co/npm/angie-framework.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/angie-framework/)
+[![NPM](https://nodei.co/npm/angie-rest-framework.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/angie-rest-framework/)
 
 ## About
 This package allows you to wrap your Angie application routes in endpoints specific to their RESTful methods. It includes many serializers to parse incoming data and renderers to parse outgoing data.
