@@ -1,5 +1,14 @@
 language: node_js
 node_js:
-  - "0.12"
-  - "iojs-2.5.0"
-  - "4.0.0"
+  - 0.12
+  - iojs-v2.5.0
+  - 4.0.0
+deploy:
+  provider: npm
+  email: joe.groseclose@gmail.com
+  api_key:
+    secure: L+eKEeX+TldnBwNiyv1xL2KJTqsbaypSOc6H0cGG9vDXtl9HFdTy99rWNgsEuC3tJhrtDMAckE/Uo6eIucb1Y+m23PVQeABL7jPXHriuZYuqrRb0vJZq9EzVuJ3RwCFcAmjO0Zf34G/iFriIr31CjDHnCVMY6o2Dy9Xdi96SVL7Hd2Tiu/I/5T/xAIfQCD7ZJXeGebR0Wz6Bh0x6wtF67YIQgUgrjIeYzdSJOWzQ4798LY9/SQTP5Me9XM3bQr00K6qUigSJGm6oy3DLPrxe6qfni2AXfyy2+kHzfDomSOfnw5lFf/3mYN270vH1bEe75z7o4XkfhisEtRoDVwHnNa9ilIWrLZ+9ZcvNBWDhk2yrzEmSTy9tJYFQg6OBibC7Gldns7ryJq6UYC631vRH43V/Jk3QecsV3yw+xZfI3v/14PPU9X4bEXN/id3YljWq6gtRBmJqXxDNAQ4kmS1cPRnMvutlRY8TSYwMKbwquPJ1Zws+q0Bx9g/IIz1sziifXrQzu0OO8plR27dwr8YWmCxRpdZuNFauLFJno5NqnPAoyziDOxP8+52o6o/siyyI8jIAcbB2K3I9A+8ANPuM7jC2VB/h37Z9yyxA/RJR2JoA4SVuUMPzZzgfJSitXiwZaUwnK4vRKYDcUZ3TdWgMAxqOkzdPPwF1VNqv2M0tltM=
+  on:
+    tags: true
+    node: 4.0.0
+    repo: benderTheCrime/angie-rest-framework
